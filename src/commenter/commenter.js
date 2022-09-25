@@ -34,7 +34,7 @@ const listComments = async(octokit, owner, repo, issueNumber) => {
 }
 
 const findCommentBySubstring = (comments, str) => {
-    return comments.find(comment => comment.body.contains(str));
+    return comments.find(comment => comment.body.includes(str));
 }
 
 const comment = async(token, updateExisting, body) => {
