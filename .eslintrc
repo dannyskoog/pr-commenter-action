@@ -16,5 +16,7 @@
         "sourceType": "module"
     },
     "rules": {
+        "semi": "error",
+        "comma-dangle": ["error", "always-multiline"]
     }
 }

@@ -9519,29 +9519,62 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.comment = void 0;
 const github = __importStar(__nccwpck_require__(5438));
-const core = __importStar(__nccwpck_require__(2186));
+const github_client_1 = __nccwpck_require__(7051);
 const COMMENT_MARKER = '<!-- PR_COMMENTER -->';
-const createComment = async (octokit, owner, repo, issueNumber, body, marker) => {
-    if (marker) {
-        body = `${body}\n\n${marker}`;
+const comment = async (token, updateExisting, body) => {
+    const octokit = github.getOctokit(token);
+    const { repo: { repo, owner }, issue: { number: issueNumber } } = github.context;
+    if (updateExisting) {
+        const comments = await (0, github_client_1.listIssueComments)(octokit, owner, repo, issueNumber);
+        const comment = findCommentBySubstring(comments, COMMENT_MARKER);
+        if (comment) {
+            await (0, github_client_1.updateIssueComment)(octokit, owner, repo, comment.id, commentBodyWithMarker(body));
+        }
+        else {
+            await (0, github_client_1.createIssueComment)(octokit, owner, repo, issueNumber, commentBodyWithMarker(body));
+        }
     }
+    else {
+        await (0, github_client_1.createIssueComment)(octokit, owner, repo, issueNumber, body);
+    }
+};
+exports.comment = comment;
+const findCommentBySubstring = (comments, str) => {
+    return comments.find(comment => comment.body?.includes(str));
+};
+const commentBodyWithMarker = (body) => {
+    return `${body}\n\n${COMMENT_MARKER}`;
+};
+
+
+/***/ }),
+
+/***/ 7051:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.listIssueComments = exports.updateIssueComment = exports.createIssueComment = void 0;
+const createIssueComment = async (octokit, owner, repo, issueNumber, body) => {
     return await octokit.rest.issues.createComment({
         owner,
         repo,
         issue_number: issueNumber,
-        body
+        body,
     });
 };
-const updateComment = async (octokit, owner, repo, commentId, body, marker) => {
-    body = `${body}\n\n${marker}`;
+exports.createIssueComment = createIssueComment;
+const updateIssueComment = async (octokit, owner, repo, commentId, body) => {
     return await octokit.rest.issues.updateComment({
         owner,
         repo,
         comment_id: commentId,
-        body
+        body,
     });
 };
-const listComments = async (octokit, owner, repo, issueNumber) => {
+exports.updateIssueComment = updateIssueComment;
+const listIssueComments = async (octokit, owner, repo, issueNumber) => {
     const { data: comments } = await octokit.rest.issues.listComments({
         owner,
         repo,
@@ -9549,29 +9582,7 @@ const listComments = async (octokit, owner, repo, issueNumber) => {
     });
     return comments;
 };
-const findCommentBySubstring = (comments, str) => {
-    return comments.find(comment => comment.body?.includes(str));
-};
-const comment = async (token, updateExisting, body) => {
-    const octokit = github.getOctokit(token);
-    const { repo: { repo, owner }, issue: { number: issueNumber } } = github.context;
-    core.info('updateExisting ' + updateExisting);
-    if (updateExisting) {
-        const comments = await listComments(octokit, owner, repo, issueNumber);
-        core.info(JSON.stringify(comments));
-        const comment = findCommentBySubstring(comments, COMMENT_MARKER);
-        if (comment) {
-            await updateComment(octokit, owner, repo, comment.id, body, COMMENT_MARKER);
-        }
-        else {
-            await createComment(octokit, owner, repo, issueNumber, body, COMMENT_MARKER);
-        }
-    }
-    else {
-        await createComment(octokit, owner, repo, issueNumber, body);
-    }
-};
-exports.comment = comment;
+exports.listIssueComments = listIssueComments;
 
 
 /***/ }),
@@ -9613,7 +9624,7 @@ async function run() {
         const message = core.getInput('message', { required: true });
         const updateExisting = core.getInput('updateExisting') === 'true';
         const token = core.getInput('token');
-        // Get to business
+        // Post comment
         await (0, commenter_1.comment)(token, updateExisting, message);
     }
     catch (error) {
