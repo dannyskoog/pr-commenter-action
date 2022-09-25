@@ -2,10 +2,10 @@
     "name": "javascript-action",
     "version": "1.0.0",
     "description": "JavaScript Action Template",
-    "main": "index.js",
+    "main": "dist/index.js",
     "scripts": {
         "lint": "eslint src/**/*.ts",
-        "build": "npm run lint && ncc build src/main.ts -o dist",
+        "build": "npm run lint && ncc build --minify src/main.ts",
         "test": "jest"
     },
     "repository": {
