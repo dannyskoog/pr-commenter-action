@@ -9742,7 +9742,7 @@ async function run() {
 
     // Parse inputs
     const messageInput = core.getInput('message', { required: true })
-    const updateExistingInput = core.getInput('updateExisting')
+    const updateExistingInput = core.getInput('updateExisting') === 'true'
     core.info('updateExistingInput', updateExistingInput);
     const tokenInput = core.getInput('token')
 
