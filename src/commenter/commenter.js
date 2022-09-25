@@ -16,11 +16,11 @@ const createComment = async(octokit, owner, repo, issueNumber, body, marker) => 
     })
 }
 
-const updateComment = async(octokit, owner, repo, issueNumber, body) => {
+const updateComment = async(octokit, owner, repo, commentId, body) => {
     return await octokit.rest.issues.updateComment({
         owner,
         repo,
-        issue_number: issueNumber,
+        comment_id: commentId,
         body
     })
 }
@@ -54,7 +54,7 @@ const comment = async(token, updateExisting, body) => {
         const comment = findCommentBySubstring(comments, COMMENT_MARKER)
 
         if (comment) {
-            await updateComment(octokit, owner, repo, issueNumber, body)
+            await updateComment(octokit, owner, repo, comment.id, body)
         } else {
             await createComment(octokit, owner, repo, issueNumber, body, COMMENT_MARKER)
         }
