@@ -9515,7 +9515,7 @@ const updateComment = async(octokit, owner, repo, issueNumber, body) => {
 }
 
 const listComments = async(octokit, owner, repo, issueNumber) => {
-    const comments = await octokit.rest.issues.listComments({
+    const { data: comments } = await octokit.rest.issues.listComments({
         owner,
         repo,
         issue_number: issueNumber,
@@ -9533,6 +9533,8 @@ const findCommentBySubstring = (comments, str) => {
 const comment = async(token, updateExisting, body) => {
     const octokit = github.getOctokit(token);
     const { repo: { repo, owner }, issue: { number: issueNumber } } = github.context;
+
+    core.info('updateExisting ' + updateExisting);
 
     if (updateExisting) {
         const comments = await listComments(octokit, owner, repo, issueNumber);
