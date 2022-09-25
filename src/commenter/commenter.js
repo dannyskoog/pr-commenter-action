@@ -17,7 +17,7 @@ const createComment = async(octokit, owner, repo, issueNumber, body, marker) => 
 }
 
 const updateComment = async(octokit, owner, repo, issueNumber, body) => {
-    return await octokit.rest.issues.createComment({
+    return await octokit.rest.issues.updateComment({
         owner,
         repo,
         issue_number: issueNumber,
