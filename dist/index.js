@@ -9525,13 +9525,14 @@ const listComments = async(octokit, owner, repo, issueNumber) => {
         issue_number: issueNumber,
     });
 
-    core.info(JSON.stringify(comments));
-
     return comments
 }
 
 const findCommentBySubstring = (comments, str) => {
-    return comments.find(comment => comment.body.includes(str));
+    return comments.find(comment => {
+        core.info('body ' + comment.body);
+        return comment.body.includes(str)
+    });
 }
 
 const comment = async(token, updateExisting, body) => {
@@ -9542,6 +9543,7 @@ const comment = async(token, updateExisting, body) => {
 
     if (updateExisting) {
         const comments = await listComments(octokit, owner, repo, issueNumber);
+        core.info(JSON.stringify(comments));
         const comment = findCommentBySubstring(comments, COMMENT_MARKER)
 
         if (comment) {
