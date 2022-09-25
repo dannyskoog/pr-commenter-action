@@ -1,4 +1,5 @@
 {
+    "parser": "@typescript-eslint/parser",
     "env": {
         "commonjs": false,
         "es6": true,
@@ -11,7 +12,8 @@
         "SharedArrayBuffer": "readonly"
     },
     "parserOptions": {
-        "ecmaVersion": 2018
+        "ecmaVersion": 2021,
+        "sourceType": "module"
     },
     "rules": {
     }

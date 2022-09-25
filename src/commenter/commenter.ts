@@ -1,11 +1,13 @@
-const github = require('@actions/github')
-const core = require('@actions/core');
+import * as github from '@actions/github';
+import * as core from '@actions/core';
+import { GitHub } from '@actions/github/lib/utils';
+import { GetResponseDataTypeFromEndpointMethod } from "@octokit/types";
 
-const COMMENT_MARKER = '<!-- PR_COMMENTER -->'
+const COMMENT_MARKER = '<!-- PR_COMMENTER -->';
 
-const createComment = async(octokit, owner, repo, issueNumber, body, marker) => {
+const createComment = async(octokit: InstanceType<typeof GitHub>, owner: string, repo: string, issueNumber: number, body: string, marker?: string) => {
     if (marker) {
-        body = `${body}\n${marker}`
+        body = `${body}\n\n${marker}`
     }
 
     return await octokit.rest.issues.createComment({
@@ -16,8 +18,8 @@ const createComment = async(octokit, owner, repo, issueNumber, body, marker) => 
     })
 }
 
-const updateComment = async(octokit, owner, repo, commentId, body, marker) => {
-    body = `${body}\n${marker}`
+const updateComment = async(octokit: InstanceType<typeof GitHub>, owner: string, repo: string, commentId: number, body: string, marker: string) => {
+    body = `${body}\n\n${marker}`
 
     return await octokit.rest.issues.updateComment({
         owner,
@@ -27,7 +29,7 @@ const updateComment = async(octokit, owner, repo, commentId, body, marker) => {
     })
 }
 
-const listComments = async(octokit, owner, repo, issueNumber) => {
+const listComments = async(octokit: InstanceType<typeof GitHub>, owner: string, repo: string, issueNumber: number) => {
     const { data: comments } = await octokit.rest.issues.listComments({
         owner,
         repo,
@@ -37,14 +39,11 @@ const listComments = async(octokit, owner, repo, issueNumber) => {
     return comments
 }
 
-const findCommentBySubstring = (comments, str) => {
-    return comments.find(comment => {
-        core.info('body ' + comment.body);
-        return comment.body.includes(str)
-    });
+const findCommentBySubstring = (comments: GetResponseDataTypeFromEndpointMethod<InstanceType<typeof GitHub>['rest']['issues']['listComments']>, str: string) => {
+    return comments.find(comment => comment.body?.includes(str));
 }
 
-const comment = async(token, updateExisting, body) => {
+export const comment = async(token: string, updateExisting: boolean, body: string) => {
     const octokit = github.getOctokit(token);
     const { repo: { repo, owner }, issue: { number: issueNumber } } = github.context;
 
@@ -63,8 +62,4 @@ const comment = async(token, updateExisting, body) => {
     } else {
         await createComment(octokit, owner, repo, issueNumber, body)
     }
-}
-
-module.exports = {
-    comment
 }
