@@ -17,6 +17,7 @@
     },
     "rules": {
         "semi": "error",
-        "comma-dangle": ["error", "always-multiline"]
+        "comma-dangle": ["error", "always-multiline"],
+        "indent": ["error", 2]
     }
 }

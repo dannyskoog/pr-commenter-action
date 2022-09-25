@@ -1,16 +1,16 @@
 import * as core from '@actions/core';
-import { comment } from './commenter/commenter';
+import { postComment } from './commenter/commenter';
 
 
 async function run() {
   try {
     // Read inputs
     const message = core.getInput('message', { required: true });
-    const updateExisting = core.getInput('updateExisting') === 'true';
+    const marker = core.getInput('marker');
     const token = core.getInput('token');
 
     // Post comment
-    await comment(token, updateExisting, message);
+    await postComment(token, marker, message);
   } catch (error) {
     const message = (error as any).message;
     core.setFailed(message);

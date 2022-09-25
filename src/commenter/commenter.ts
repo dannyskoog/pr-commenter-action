@@ -1,32 +1,28 @@
 import * as github from '@actions/github';
-import { GitHub } from '@actions/github/lib/utils';
-import { GetResponseDataTypeFromEndpointMethod } from "@octokit/types";
-import { createIssueComment, listIssueComments, updateIssueComment } from '../github-client/github-client';
+import { createIssueComment, IssueComment, listIssueComments, updateIssueComment } from '../api/api';
 
-const COMMENT_MARKER = '<!-- PR_COMMENTER -->';
+export const postComment = async (token: string, marker: string, message: string) => {
+  const octokit = github.getOctokit(token);
+  const { repo: { repo, owner }, issue: { number: issueNumber } } = github.context;
 
-export const comment = async(token: string, updateExisting: boolean, body: string) => {
-    const octokit = github.getOctokit(token);
-    const { repo: { repo, owner }, issue: { number: issueNumber } } = github.context;
+  if (marker) {
+    const comments = await listIssueComments(octokit, owner, repo, issueNumber);
+    const comment = findCommentBySubstring(comments, marker);
 
-    if (updateExisting) {
-        const comments = await listIssueComments(octokit, owner, repo, issueNumber);
-        const comment = findCommentBySubstring(comments, COMMENT_MARKER);
-
-        if (comment) {
-            await updateIssueComment(octokit, owner, repo, comment.id, commentBodyWithMarker(body));
-        } else {
-            await createIssueComment(octokit, owner, repo, issueNumber, commentBodyWithMarker(body));
-        }
+    if (comment) {
+      await updateIssueComment(octokit, owner, repo, comment.id, messageWithMarker(message, marker));
     } else {
-        await createIssueComment(octokit, owner, repo, issueNumber, body);
+      await createIssueComment(octokit, owner, repo, issueNumber, messageWithMarker(message, marker));
     }
+  } else {
+    await createIssueComment(octokit, owner, repo, issueNumber, message);
+  }
 };
 
-const findCommentBySubstring = (comments: GetResponseDataTypeFromEndpointMethod<InstanceType<typeof GitHub>['rest']['issues']['listComments']>, str: string) => {
-    return comments.find(comment => comment.body?.includes(str));
+const findCommentBySubstring = (comments: IssueComment[], str: string) => {
+  return comments.find(comment => comment.body?.includes(str));
 };
 
-const commentBodyWithMarker = (body: string) => {
-    return `${body}\n\n${COMMENT_MARKER}`;
+const messageWithMarker = (message: string, marker: string) => {
+  return `${message}\n\n${marker}`;
 };

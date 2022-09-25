@@ -9488,68 +9488,7 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 5441:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.comment = void 0;
-const github = __importStar(__nccwpck_require__(5438));
-const github_client_1 = __nccwpck_require__(7051);
-const COMMENT_MARKER = '<!-- PR_COMMENTER -->';
-const comment = async (token, updateExisting, body) => {
-    const octokit = github.getOctokit(token);
-    const { repo: { repo, owner }, issue: { number: issueNumber } } = github.context;
-    if (updateExisting) {
-        const comments = await (0, github_client_1.listIssueComments)(octokit, owner, repo, issueNumber);
-        const comment = findCommentBySubstring(comments, COMMENT_MARKER);
-        if (comment) {
-            await (0, github_client_1.updateIssueComment)(octokit, owner, repo, comment.id, commentBodyWithMarker(body));
-        }
-        else {
-            await (0, github_client_1.createIssueComment)(octokit, owner, repo, issueNumber, commentBodyWithMarker(body));
-        }
-    }
-    else {
-        await (0, github_client_1.createIssueComment)(octokit, owner, repo, issueNumber, body);
-    }
-};
-exports.comment = comment;
-const findCommentBySubstring = (comments, str) => {
-    return comments.find(comment => comment.body?.includes(str));
-};
-const commentBodyWithMarker = (body) => {
-    return `${body}\n\n${COMMENT_MARKER}`;
-};
-
-
-/***/ }),
-
-/***/ 7051:
+/***/ 8579:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -9583,6 +9522,66 @@ const listIssueComments = async (octokit, owner, repo, issueNumber) => {
     return comments;
 };
 exports.listIssueComments = listIssueComments;
+
+
+/***/ }),
+
+/***/ 5441:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.postComment = void 0;
+const github = __importStar(__nccwpck_require__(5438));
+const api_1 = __nccwpck_require__(8579);
+const postComment = async (token, marker, message) => {
+    const octokit = github.getOctokit(token);
+    const { repo: { repo, owner }, issue: { number: issueNumber } } = github.context;
+    if (marker) {
+        const comments = await (0, api_1.listIssueComments)(octokit, owner, repo, issueNumber);
+        const comment = findCommentBySubstring(comments, marker);
+        if (comment) {
+            await (0, api_1.updateIssueComment)(octokit, owner, repo, comment.id, messageWithMarker(message, marker));
+        }
+        else {
+            await (0, api_1.createIssueComment)(octokit, owner, repo, issueNumber, messageWithMarker(message, marker));
+        }
+    }
+    else {
+        await (0, api_1.createIssueComment)(octokit, owner, repo, issueNumber, message);
+    }
+};
+exports.postComment = postComment;
+const findCommentBySubstring = (comments, str) => {
+    return comments.find(comment => comment.body?.includes(str));
+};
+const messageWithMarker = (message, marker) => {
+    return `${message}\n\n${marker}`;
+};
 
 
 /***/ }),
@@ -9622,10 +9621,10 @@ async function run() {
     try {
         // Read inputs
         const message = core.getInput('message', { required: true });
-        const updateExisting = core.getInput('updateExisting') === 'true';
+        const marker = core.getInput('marker');
         const token = core.getInput('token');
         // Post comment
-        await (0, commenter_1.comment)(token, updateExisting, message);
+        await (0, commenter_1.postComment)(token, marker, message);
     }
     catch (error) {
         const message = error.message;

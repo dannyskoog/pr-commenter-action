@@ -2,16 +2,16 @@ name: 'PR commenter'
 description: 'Comments on pull requests'
 inputs:
   message:
-    description: 'Message to post in the comment'
+    description: 'Comment message'
     required: true
-  updateExisting:
-    description: 'Flag indicating whether to update an existing comment or not'
+  marker:
+    description: 'Marker to look for in existing comments. If found the comment will be updated'
     required: false
-    default: 'false'
+    default: ''
   token:
-    description: 'Token to use'
+    description: 'GitHub access token'
     required: false
-    default: ${{ github.token }}
+    default: '${{ github.token }}'
 runs:
   using: 'node16'
   main: 'dist/index.js'
