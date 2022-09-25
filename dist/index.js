@@ -9496,7 +9496,11 @@ const core = __nccwpck_require__(2186);
 
 const COMMENT_MARKER = '<!-- PR_COMMENTER -->'
 
-const createComment = async(octokit, owner, repo, issueNumber, body) => {
+const createComment = async(octokit, owner, repo, issueNumber, body, marker) => {
+    if (marker) {
+        body = `${body}\n${marker}`
+    }
+
     return await octokit.rest.issues.createComment({
         owner,
         repo,
@@ -9542,11 +9546,12 @@ const comment = async(token, updateExisting, body) => {
 
         if (comment) {
             await updateComment(octokit, owner, repo, issueNumber, body)
-            return
+        } else {
+            await createComment(octokit, owner, repo, issueNumber, body, COMMENT_MARKER)
         }
+    } else {
+        await createComment(octokit, owner, repo, issueNumber, body)
     }
-
-    createComment(octokit, owner, repo, issueNumber, body)
 }
 
 module.exports = {
