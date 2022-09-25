@@ -37,7 +37,7 @@ const comment = async(token, updateExisting, body) => {
     const { repo: { repo, owner }, issue: { number: issueNumber } } = github.context;
 
     if (updateExisting) {
-        const comments = listComments(octokit, owner, repo, issueNumber);
+        const comments = await listComments(octokit, owner, repo, issueNumber);
         const comment = findCommentBySubstring(comments, COMMENT_MARKER)
 
         if (comment) {
