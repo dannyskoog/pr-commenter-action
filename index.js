@@ -8,8 +8,8 @@ async function run() {
 
     // Parse inputs
     const messageInput = core.getInput('message', { required: true })
+    core.info('updateExistingInput ' + core.getInput('updateExisting'));
     const updateExistingInput = core.getInput('updateExisting') === 'true'
-    core.info('updateExistingInput', updateExistingInput);
     const tokenInput = core.getInput('token')
 
     await commenter.comment(tokenInput, updateExistingInput, messageInput);
