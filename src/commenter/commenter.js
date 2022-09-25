@@ -28,7 +28,7 @@ const listComments = async(octokit, owner, repo, issueNumber) => {
         issue_number: issueNumber,
     });
 
-    core.info(comments);
+    core.info(JSON.stringify(comments));
 
     return comments
 }
