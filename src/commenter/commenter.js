@@ -1,4 +1,5 @@
 const github = require('@actions/github')
+const core = require('@actions/core');
 
 const COMMENT_MARKER = '<!-- PR_COMMENTER -->'
 
@@ -21,11 +22,15 @@ const updateComment = async(octokit, owner, repo, issueNumber, body) => {
 }
 
 const listComments = async(octokit, owner, repo, issueNumber) => {
-    return await octokit.rest.issues.listComments({
+    const comments = await octokit.rest.issues.listComments({
         owner,
         repo,
         issue_number: issueNumber,
     });
+
+    core.info(comments);
+
+    return comments
 }
 
 const findCommentBySubstring = (comments, str) => {
